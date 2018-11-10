@@ -5,3 +5,4 @@ authors = ["Sereinity <sereinity@sereinity.fr>"]
 edition = "2018"
 
 [dependencies]
+rulinalg = "0.4.2"
