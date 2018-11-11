@@ -1,7 +1,10 @@
 extern crate rulinalg;
+extern crate rand;
 
 use rulinalg::vector::Vector;
 use rulinalg::norm::Euclidean;
+
+use rand::prelude::*;
 
 struct Ray<'a> {
     orig: &'a Vector<f64>,
@@ -76,6 +79,31 @@ fn hit(obj_list: &Vec<Box<Object>>, ray: &Ray, t_min: f64, t_max: f64) -> Option
     hit_rec
 }
 
+struct Camera {
+    lower_left_corner: Vector<f64>,
+    horizontal: Vector<f64>,
+    vertical: Vector<f64>,
+    origin: Vector<f64>,
+}
+
+impl Camera {
+    fn new() -> Camera {
+        Camera {
+            lower_left_corner: Vector::new(vec![-2.0, -1.0, -1.0]),
+            horizontal: Vector::new(vec![4.0, 0.0, 0.0]),
+            vertical: Vector::new(vec![0.0, 2.0, 0.0]),
+            origin: Vector::new(vec![0.0, 0.0, 0.0]),
+        }
+    }
+
+    fn get_ray(&self, u: f64, v: f64) -> Ray {
+        Ray{
+            orig: &self.origin,
+            dire: &self.lower_left_corner + &self.horizontal*u + &self.vertical*v - &self.origin,
+        }
+    }
+}
+
 fn color(r: &Ray, world: &Vec<Box<Object>>) -> Vector<f64> {
     match hit(world, r, 0.0, std::f64::MAX) {
         Some(hit_rec) => {
@@ -91,12 +119,7 @@ fn color(r: &Ray, world: &Vec<Box<Object>>) -> Vector<f64> {
 fn main() {
     let nx = 200;
     let ny = 100;
-    println!("P3\n{} {}\n255", nx, ny);
-
-    let llc = Vector::new(vec![-2.0, -1.0, -1.0]);
-    let hori = Vector::new(vec![4.0, 0.0, 0.0]);
-    let vert = Vector::new(vec![0.0, 2.0, 0.0]);
-    let orig = Vector::new(vec![0.0, 0.0, 0.0]);
+    let ns = 100;
 
     let world: Vec<Box<Object>> = vec![
         Box::new(Sphere {
@@ -108,13 +131,23 @@ fn main() {
             radius: 100.0,
         }),
     ];
+
+    let cam = Camera::new();
+    let mut rng = thread_rng();
+
+    println!("P3\n{} {}\n255", nx, ny);
     for j in (0..ny).rev() {
         for i in 0..nx {
-            let u = i as f64 / nx as f64;
-            let v = j as f64 / ny as f64;
-            let r = Ray{orig: &orig, dire: &llc + &hori*u + &vert*v};
-            let v = color(&r, &world) * 255.99;
-            println!("{} {} {}", v[0] as usize, v[1] as usize, v[2] as usize);
+            let mut col = Vector::new(vec![0.0, 0.0, 0.0]);
+            for _ in 0..ns {
+                let u = (i as f64 + rng.gen::<f64>()) / nx as f64;
+                let v = (j as f64 + rng.gen::<f64>()) / ny as f64;
+                let r = cam.get_ray(u, v);
+                col += color(&r, &world);
+            }
+            col *= 255.99;
+            col /= ns as f64;
+            println!("{} {} {}", col[0] as usize, col[1] as usize, col[2] as usize);
         }
     }
 }
