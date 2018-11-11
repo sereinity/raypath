@@ -15,8 +15,20 @@ impl<'a> Ray<'a> {
 }
 
 fn color(r: &Ray) -> Vector<f64> {
+    if hit_sphere(&Vector::new(vec![0.0, 0.0, -1.0]), 0.5, &r) {
+        return Vector::new(vec![1.0, 0.0, 0.0]);
+    }
     let t = 0.5*unitize(&r.dire)[1] + 1.0;
     Vector::ones(3)*(1.0-t) + Vector::new(vec![0.5, 0.7, 1.0])*t
+}
+
+fn hit_sphere(center: &Vector<f64>, radius: f64, r: &Ray) -> bool {
+    let oc = r.orig - center;
+    let a = r.dire.dot(&r.dire);
+    let b = 2.0 * oc.dot(&r.dire);
+    let c = oc.dot(&oc) - radius*radius;
+    let discriminent = b*b - 4.0*a*c;
+    discriminent >= 0.0
 }
 
 fn main() {
