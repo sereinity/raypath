@@ -3,40 +3,88 @@ extern crate rulinalg;
 use rulinalg::vector::Vector;
 use rulinalg::norm::Euclidean;
 
-pub struct Ray<'a> {
+struct Ray<'a> {
     orig: &'a Vector<f64>,
     dire: Vector<f64>,
 }
 
 impl<'a> Ray<'a> {
-    pub fn point_at_parameter(&self, param: f64) -> Vector<f64> {
+    fn point_at_parameter(&self, param: f64) -> Vector<f64> {
         self.orig + &self.dire*param
     }
 }
 
-fn color(r: &Ray) -> Vector<f64> {
-    match hit_sphere(&Vector::new(vec![0.0, 0.0, -1.0]), 0.5, &r) {
-        Some(distance) => {
-            let n = unitize(&(r.point_at_parameter(distance) - Vector::new(vec![0.0, 0.0, -1.0])));
-            return  (n + Vector::ones(3))*0.5;
+struct HitRec {
+    t: f64,
+    p: Vector<f64>,
+    norm: Vector<f64>,
+}
+
+trait Object {
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRec>;
+}
+
+struct Sphere {
+    center: Vector<f64>,
+    radius: f64,
+}
+
+impl Object for Sphere {
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRec> {
+        let oc = ray.orig - &self.center;
+        let a = ray.dire.dot(&ray.dire);
+        let b = oc.dot(&ray.dire);
+        let c = oc.dot(&oc) - &self.radius*&self.radius;
+        let discriminent = b*b - a*c;
+        return if discriminent >= 0.0 {
+            let temp = (-b -discriminent.sqrt()) / a;
+            if (temp <= t_max) & (temp >= t_min) {
+                let point = ray.point_at_parameter(temp);
+                let norm = unitize(&((&point - &self.center) / &self.radius));
+                return Some(HitRec{
+                    t: temp,
+                    p: point,
+                    norm: norm,
+                });
+            }
+            let temp = (-b +discriminent.sqrt()) / a;
+            if (temp <= t_max) & (temp >= t_min) {
+                let point = ray.point_at_parameter(temp);
+                let norm = unitize(&((&point - &self.center) / &self.radius));
+                return Some(HitRec{
+                    t: temp,
+                    p: point,
+                    norm: norm,
+                });
+            }
+            None
+        } else {
+            None
+        }
+    }
+}
+
+fn hit(obj_list: &Vec<Box<Object>>, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRec> {
+    let mut hit_rec: Option<HitRec> = None;
+    let mut closest_so_far = t_max;
+    for object in obj_list {
+        if let Some(temp_hit_rec) = object.hit(ray, t_min, closest_so_far) {
+            closest_so_far = temp_hit_rec.t;
+            hit_rec = Some(temp_hit_rec);
+        }
+    }
+    hit_rec
+}
+
+fn color(r: &Ray, world: &Vec<Box<Object>>) -> Vector<f64> {
+    match hit(world, r, 0.0, std::f64::MAX) {
+        Some(hit_rec) => {
+            (hit_rec.norm + Vector::ones(3))*0.5
         }
         None => {
             let t = 0.5*unitize(&r.dire)[1] + 1.0;
             Vector::ones(3)*(1.0-t) + Vector::new(vec![0.5, 0.7, 1.0])*t
         }
-    }
-}
-
-fn hit_sphere(center: &Vector<f64>, radius: f64, r: &Ray) -> Option<f64> {
-    let oc = r.orig - center;
-    let a = r.dire.dot(&r.dire);
-    let b = oc.dot(&r.dire);
-    let c = oc.dot(&oc) - radius*radius;
-    let discriminent = b*b - a*c;
-    return if discriminent >= 0.0 {
-        Some((-b -discriminent.sqrt()) / a)
-    } else {
-        None
     }
 }
 
@@ -50,12 +98,22 @@ fn main() {
     let vert = Vector::new(vec![0.0, 2.0, 0.0]);
     let orig = Vector::new(vec![0.0, 0.0, 0.0]);
 
+    let world: Vec<Box<Object>> = vec![
+        Box::new(Sphere {
+            center: Vector::new(vec![0.0, 0.0, -1.0]),
+            radius: 0.5,
+        }),
+        Box::new(Sphere {
+            center: Vector::new(vec![0.0, -100.5, -1.0]),
+            radius: 100.0,
+        }),
+    ];
     for j in (0..ny).rev() {
         for i in 0..nx {
             let u = i as f64 / nx as f64;
             let v = j as f64 / ny as f64;
             let r = Ray{orig: &orig, dire: &llc + &hori*u + &vert*v};
-            let v = color(&r) * 255.99;
+            let v = color(&r, &world) * 255.99;
             println!("{} {} {}", v[0] as usize, v[1] as usize, v[2] as usize);
         }
     }
