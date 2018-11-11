@@ -1,6 +1,7 @@
 extern crate rulinalg;
 
 use rulinalg::vector::Vector;
+use rulinalg::norm::Euclidean;
 
 pub struct Ray<'a> {
     orig: &'a Vector<f64>,
@@ -14,8 +15,8 @@ impl<'a> Ray<'a> {
 }
 
 fn color(r: &Ray) -> Vector<f64> {
-    let t = 0.5*r.dire[1] + 1.0;
-    Vector::new(vec![1.0, 1.0, 1.0])*(1.0-t) + Vector::new(vec![0.5, 0.7, 1.0])*t
+    let t = 0.5*unitize(&r.dire)[1] + 1.0;
+    Vector::ones(3)*(1.0-t) + Vector::new(vec![0.5, 0.7, 1.0])*t
 }
 
 fn main() {
@@ -37,4 +38,9 @@ fn main() {
             println!("{} {} {}", v[0] as usize, v[1] as usize, v[2] as usize);
         }
     }
+}
+
+fn unitize(vect: &Vector<f64>) -> Vector<f64> {
+    let norm = vect.norm(Euclidean);
+    vect / norm
 }
