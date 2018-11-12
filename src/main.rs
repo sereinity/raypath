@@ -12,6 +12,13 @@ struct Ray<'a> {
 }
 
 impl<'a> Ray<'a> {
+    fn new(origin: &Vector<f64>, direction: Vector<f64>) -> Ray {
+        Ray {
+            orig: origin,
+            dire: direction,
+        }
+    }
+
     fn point_at_parameter(&self, param: f64) -> Vector<f64> {
         self.orig + &self.dire*param
     }
@@ -97,10 +104,10 @@ impl Camera {
     }
 
     fn get_ray(&self, u: f64, v: f64) -> Ray {
-        Ray{
-            orig: &self.origin,
-            dire: &self.lower_left_corner + &self.horizontal*u + &self.vertical*v - &self.origin,
-        }
+        Ray::new(
+            &self.origin,
+            &self.lower_left_corner + &self.horizontal*u + &self.vertical*v - &self.origin,
+            )
     }
 }
 
