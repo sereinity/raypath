@@ -50,7 +50,7 @@ impl Object for Sphere {
             let temp = (-b -discriminent.sqrt()) / a;
             if (temp <= t_max) & (temp >= t_min) {
                 let point = ray.point_at_parameter(temp);
-                let norm = unitize(&((&point - &self.center) / &self.radius));
+                let norm = (&point - &self.center) / &self.radius;
                 return Some(HitRec{
                     t: temp,
                     p: point,
@@ -60,7 +60,7 @@ impl Object for Sphere {
             let temp = (-b +discriminent.sqrt()) / a;
             if (temp <= t_max) & (temp >= t_min) {
                 let point = ray.point_at_parameter(temp);
-                let norm = unitize(&((&point - &self.center) / &self.radius));
+                let norm = (&point - &self.center) / &self.radius;
                 return Some(HitRec{
                     t: temp,
                     p: point,
@@ -112,9 +112,10 @@ impl Camera {
 }
 
 fn color(r: &Ray, world: &Vec<Box<Object>>) -> Vector<f64> {
-    match hit(world, r, 0.0, std::f64::MAX) {
+    match hit(world, r, 0.0001, std::f64::INFINITY) {
         Some(hit_rec) => {
-            (hit_rec.norm + Vector::ones(3))*0.5
+            let target = &hit_rec.norm + random_in_unit_sphere();
+            color(&Ray::new(&hit_rec.p, target), &world)*0.5
         }
         None => {
             let t = 0.5*unitize(&r.dire)[1] + 1.0;
@@ -162,4 +163,16 @@ fn main() {
 fn unitize(vect: &Vector<f64>) -> Vector<f64> {
     let norm = vect.norm(Euclidean);
     vect / norm
+}
+
+fn random_in_unit_sphere() -> Vector<f64> {
+    let mut rng = thread_rng();
+    loop {
+        // Random taken from a square of 2x2x2 centered on 1x1x1
+        let mut p = Vector::new(vec![rng.gen::<f64>(), rng.gen::<f64>(), rng.gen::<f64>()])*2.0;
+        p -= Vector::ones(3);
+        if p.dot(&p) < 1.0 {  // Is it in a sphere?
+            return p;
+        }
+    }
 }
