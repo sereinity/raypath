@@ -153,9 +153,8 @@ fn main() {
                 let r = cam.get_ray(u, v);
                 col += color(&r, &world);
             }
-            col *= 255.99;
-            col /= ns as f64;
-            println!("{} {} {}", col[0] as usize, col[1] as usize, col[2] as usize);
+            let col = Vector::new(col.data().into_iter().map(|x| (x*255.99/(ns as f64)) as usize).collect::<Vec<_>>());
+            println!("{} {} {}", col[0], col[1], col[2]);
         }
     }
 }
