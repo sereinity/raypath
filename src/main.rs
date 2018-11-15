@@ -11,9 +11,10 @@ use rand::prelude::*;
 use raytracer::ray::{Ray, HitRec};
 use raytracer::camera::Camera;
 use raytracer::object::Object;
-use raytracer::sphere::{Sphere, random_in_unit_sphere};
+use raytracer::sphere::Sphere;
+use raytracer::material::Material;
 
-fn hit(obj_list: &Vec<Box<Object>>, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRec> {
+fn hit<'a>(obj_list: &'a Vec<Box<Object>>, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRec<'a>> {
     let mut hit_rec: Option<HitRec> = None;
     let mut closest_so_far = t_max;
     for object in obj_list {
@@ -25,11 +26,15 @@ fn hit(obj_list: &Vec<Box<Object>>, ray: &Ray, t_min: f64, t_max: f64) -> Option
     hit_rec
 }
 
-fn color(r: &Ray, world: &Vec<Box<Object>>) -> Vector<f64> {
+fn color(r: &Ray, world: &Vec<Box<Object>>, depth: usize) -> Vector<f64> {
     match hit(world, r, 0.0001, std::f64::INFINITY) {
         Some(hit_rec) => {
-            let target = &hit_rec.norm + random_in_unit_sphere();
-            color(&Ray::new(&hit_rec.p, target), &world)*0.5
+            if depth < 50 {
+                let (attenuation, scattered) = hit_rec.material.scatter(r, &hit_rec);
+                color(&scattered, &world, depth+1).elemul(attenuation)
+            } else {
+                Vector::zeros(3)
+            }
         }
         None => {
             let t = 0.5*unitize(&r.dire)[1] + 1.0;
@@ -47,10 +52,12 @@ fn main() {
         Box::new(Sphere {
             center: Vector::new(vec![0.0, 0.0, -1.0]),
             radius: 0.5,
+            material: Material::Lambertian(Vector::new(vec![0.8, 0.3, 0.3])),
         }),
         Box::new(Sphere {
             center: Vector::new(vec![0.0, -100.5, -1.0]),
             radius: 100.0,
+            material: Material::Lambertian(Vector::new(vec![0.8, 0.8, 0.0])),
         }),
     ];
 
@@ -65,7 +72,7 @@ fn main() {
                 let u = (i as f64 + rng.gen::<f64>()) / nx as f64;
                 let v = (j as f64 + rng.gen::<f64>()) / ny as f64;
                 let r = cam.get_ray(u, v);
-                col += color(&r, &world);
+                col += color(&r, &world, 0);
             }
             let col = Vector::new(col.data().into_iter().map(|x| ((x/ns as f64).sqrt()*255.99) as usize).collect::<Vec<_>>());
             println!("{} {} {}", col[0], col[1], col[2]);

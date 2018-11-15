@@ -1,5 +1,7 @@
 use rulinalg::vector::Vector;
 
+use crate::material::Material;
+
 pub struct Ray<'a> {
     pub orig: &'a Vector<f64>,
     pub dire: Vector<f64>,
@@ -18,8 +20,9 @@ impl<'a> Ray<'a> {
     }
 }
 
-pub struct HitRec {
+pub struct HitRec<'a> {
     pub t: f64,
     pub p: Vector<f64>,
     pub norm: Vector<f64>,
+    pub material: &'a Material,
 }

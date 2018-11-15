@@ -1,12 +1,14 @@
 use rulinalg::vector::Vector;
 use crate::object::Object;
 use crate::ray::{Ray, HitRec};
+use crate::material::Material;
 
 use rand::prelude::*;
 
 pub struct Sphere {
     pub center: Vector<f64>,
     pub radius: f64,
+    pub material: Material,
 }
 
 impl Object for Sphere {
@@ -25,6 +27,7 @@ impl Object for Sphere {
                     t: temp,
                     p: point,
                     norm: norm,
+                    material: &self.material,
                 });
             }
             let temp = (-b +discriminent.sqrt()) / a;
@@ -35,6 +38,7 @@ impl Object for Sphere {
                     t: temp,
                     p: point,
                     norm: norm,
+                    material: &self.material,
                 });
             }
             None
