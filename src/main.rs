@@ -29,8 +29,11 @@ fn color(r: &Ray, world: &Vec<Box<Object>>, depth: usize) -> Vector<f64> {
     match hit(world, r, 0.0001, std::f64::INFINITY) {
         Some(hit_rec) => {
             if depth < 50 {
-                let (attenuation, scattered) = hit_rec.material.scatter(r, &hit_rec);
-                color(&scattered, &world, depth+1).elemul(attenuation)
+                if let Some((attenuation, scattered)) = hit_rec.material.scatter(r, &hit_rec) {
+                    color(&scattered, &world, depth+1).elemul(attenuation)
+                } else {
+                    Vector::zeros(3)
+                }
             } else {
                 Vector::zeros(3)
             }
@@ -57,6 +60,16 @@ fn main() {
             center: Vector::new(vec![0.0, -100.5, -1.0]),
             radius: 100.0,
             material: Material::Lambertian(Vector::new(vec![0.8, 0.8, 0.0])),
+        }),
+        Box::new(Sphere {
+            center: Vector::new(vec![1.0, 0.0, -1.0]),
+            radius: 0.5,
+            material: Material::Metal(Vector::new(vec![0.8, 0.6, 0.2])),
+        }),
+        Box::new(Sphere {
+            center: Vector::new(vec![-1.0, 0.0, -1.0]),
+            radius: 0.5,
+            material: Material::Metal(Vector::new(vec![0.8; 3])),
         }),
     ];
 
