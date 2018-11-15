@@ -67,7 +67,7 @@ fn main() {
                 let r = cam.get_ray(u, v);
                 col += color(&r, &world);
             }
-            let col = Vector::new(col.data().into_iter().map(|x| (x*255.99/(ns as f64)) as usize).collect::<Vec<_>>());
+            let col = Vector::new(col.data().into_iter().map(|x| ((x/ns as f64).sqrt()*255.99) as usize).collect::<Vec<_>>());
             println!("{} {} {}", col[0], col[1], col[2]);
         }
     }
