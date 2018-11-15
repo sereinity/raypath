@@ -4,10 +4,9 @@ extern crate rand;
 extern crate raytracer;
 
 use rulinalg::vector::Vector;
-use rulinalg::norm::Euclidean;
-
 use rand::prelude::*;
 
+use raytracer::unitize;
 use raytracer::ray::{Ray, HitRec};
 use raytracer::camera::Camera;
 use raytracer::object::Object;
@@ -78,9 +77,4 @@ fn main() {
             println!("{} {} {}", col[0], col[1], col[2]);
         }
     }
-}
-
-fn unitize(vect: &Vector<f64>) -> Vector<f64> {
-    let norm = vect.norm(Euclidean);
-    vect / norm
 }
