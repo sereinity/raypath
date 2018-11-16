@@ -64,12 +64,12 @@ fn main() {
         Box::new(Sphere {
             center: Vector::new(vec![1.0, 0.0, -1.0]),
             radius: 0.5,
-            material: Material::Metal(Vector::new(vec![0.8, 0.6, 0.2])),
+            material: Material::Metal(Vector::new(vec![0.8, 0.6, 0.2]), 1.0),
         }),
         Box::new(Sphere {
             center: Vector::new(vec![-1.0, 0.0, -1.0]),
             radius: 0.5,
-            material: Material::Metal(Vector::new(vec![0.8; 3])),
+            material: Material::Metal(Vector::new(vec![0.8; 3]), 0.3),
         }),
     ];
 

@@ -6,7 +6,7 @@ use crate::sphere::random_in_unit_sphere;
 
 pub enum Material {
     Lambertian(Vector<f64>),
-    Metal(Vector<f64>),
+    Metal(Vector<f64>, f64),
 }
 
 impl Material {
@@ -16,9 +16,9 @@ impl Material {
                 let target = &hitr.norm + random_in_unit_sphere();
                 Some((&attenuation, Ray::new(&hitr.p, target)))
             },
-            Material::Metal(attenuation) => {
+            Material::Metal(attenuation, fuzz) => {
                 let reflected = reflect(unitize(&ray.dire), &hitr.norm);
-                let scattered = Ray::new(&hitr.p, reflected);
+                let scattered = Ray::new(&hitr.p, reflected + random_in_unit_sphere()*fuzz.min(1.0));
                 if scattered.dire.dot(&hitr.norm) > 0.0 {
                     Some((&attenuation, scattered))
                 } else {
