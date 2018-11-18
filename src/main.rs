@@ -30,7 +30,7 @@ fn color(r: &Ray, world: &Vec<Box<Object>>, depth: usize) -> Vector<f64> {
         Some(hit_rec) => {
             if depth < 50 {
                 if let Some((attenuation, scattered)) = hit_rec.material.scatter(r, &hit_rec) {
-                    color(&scattered, &world, depth+1).elemul(attenuation)
+                    color(&scattered, &world, depth+1).elemul(&attenuation)
                 } else {
                     Vector::zeros(3)
                 }
@@ -54,7 +54,7 @@ fn main() {
         Box::new(Sphere {
             center: Vector::new(vec![0.0, 0.0, -1.0]),
             radius: 0.5,
-            material: Material::Lambertian(Vector::new(vec![0.8, 0.3, 0.3])),
+            material: Material::Lambertian(Vector::new(vec![0.1, 0.2, 0.5])),
         }),
         Box::new(Sphere {
             center: Vector::new(vec![0.0, -100.5, -1.0]),
@@ -64,12 +64,17 @@ fn main() {
         Box::new(Sphere {
             center: Vector::new(vec![1.0, 0.0, -1.0]),
             radius: 0.5,
-            material: Material::Metal(Vector::new(vec![0.8, 0.6, 0.2]), 1.0),
+            material: Material::Metal(Vector::new(vec![0.8, 0.6, 0.2]), 0.5),
         }),
         Box::new(Sphere {
             center: Vector::new(vec![-1.0, 0.0, -1.0]),
             radius: 0.5,
-            material: Material::Metal(Vector::new(vec![0.8; 3]), 0.3),
+            material: Material::Dielectric(1.5),
+        }),
+        Box::new(Sphere {
+            center: Vector::new(vec![-1.0, 0.0, -1.0]),
+            radius: -0.45,
+            material: Material::Dielectric(1.5),
         }),
     ];
 
