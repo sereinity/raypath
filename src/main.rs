@@ -78,7 +78,7 @@ fn main() {
         }),
     ];
 
-    let cam = Camera::new();
+    let cam = Camera::new(180.0, nx as f64/ny as f64);
     let mut rng = thread_rng();
 
     println!("P3\n{} {}\n255", nx, ny);
