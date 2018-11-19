@@ -1,13 +1,13 @@
 use crate::Vec3;
 use crate::material::Material;
 
-pub struct Ray<'a> {
-    pub orig: &'a Vec3,
+pub struct Ray {
+    pub orig: Vec3,
     pub dire: Vec3,
 }
 
-impl<'a> Ray<'a> {
-    pub fn new(origin: &Vec3, direction: Vec3) -> Ray {
+impl Ray {
+    pub fn new(origin: Vec3, direction: Vec3) -> Ray {
         Ray {
             orig: origin,
             dire: direction,

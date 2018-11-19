@@ -11,15 +11,15 @@ pub enum Material {
 }
 
 impl Material {
-    pub fn scatter<'a>(&self, ray: &Ray, hitr: &'a HitRec) -> Option<(Vec3, Ray<'a>)> {
+    pub fn scatter(&self, ray: &Ray, hitr: &HitRec) -> Option<(Vec3, Ray)> {
         match self {
             Material::Lambertian(attenuation) => {
                 let target = &hitr.norm + random_in_unit_sphere();
-                Some((attenuation.clone(), Ray::new(&hitr.p, target)))
+                Some((attenuation.clone(), Ray::new(hitr.p, target)))
             },
             Material::Metal(attenuation, fuzz) => {
                 let reflected = reflect(ray.dire.normalize(), &hitr.norm);
-                let scattered = Ray::new(&hitr.p, reflected + random_in_unit_sphere()*fuzz.min(1.0));
+                let scattered = Ray::new(hitr.p, reflected + random_in_unit_sphere()*fuzz.min(1.0));
                 if scattered.dire.dot(&hitr.norm) > 0.0 {
                     Some((attenuation.clone(), scattered))
                 } else {
@@ -39,12 +39,12 @@ impl Material {
                 };
                 if let Some(refracted) = refract(&ray.dire, out_norm, ni_over_nt) {
                     if rng.gen::<f64>() < schlick(cosine, &ref_idx) {
-                        Some((attenuation, Ray::new(&hitr.p, reflected)))
+                        Some((attenuation, Ray::new(hitr.p, reflected)))
                     } else {
-                        Some((attenuation, Ray::new(&hitr.p, refracted)))
+                        Some((attenuation, Ray::new(hitr.p, refracted)))
                     }
                 } else {
-                    Some((attenuation, Ray::new(&hitr.p, reflected)))
+                    Some((attenuation, Ray::new(hitr.p, reflected)))
                 }
             }
         }
