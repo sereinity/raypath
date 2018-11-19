@@ -48,38 +48,12 @@ fn main() {
     let ny = 100;
     let ns = 100;
 
-    let world: Vec<Box<Object>> = vec![
-        Box::new(Sphere {
-            center: Vec3::new(0.0, 0.0, -1.0),
-            radius: 0.5,
-            material: Material::Lambertian(Vec3::new(0.1, 0.2, 0.5)),
-        }),
-        Box::new(Sphere {
-            center: Vec3::new(0.0, -100.5, -1.0),
-            radius: 100.0,
-            material: Material::Lambertian(Vec3::new(0.8, 0.8, 0.0)),
-        }),
-        Box::new(Sphere {
-            center: Vec3::new(1.0, 0.0, -1.0),
-            radius: 0.5,
-            material: Material::Metal(Vec3::new(0.8, 0.6, 0.2), 0.5),
-        }),
-        Box::new(Sphere {
-            center: Vec3::new(-1.0, 0.0, -1.0),
-            radius: 0.5,
-            material: Material::Dielectric(1.5),
-        }),
-        Box::new(Sphere {
-            center: Vec3::new(-1.0, 0.0, -1.0),
-            radius: -0.45,
-            material: Material::Dielectric(1.5),
-        }),
-    ];
+    let world = random_scene();
 
-    let lookfrom = Vec3::new(3.0, 3.0, 2.0);
-    let lookat = Vec3::new(0.0, 0.0, -1.0);
+    let lookfrom = Vec3::new(11.0, 2.0, 3.0);
+    let lookat = Vec3::new(0.0, 0.0, 0.0);
     let dist_to_focus = (lookfrom-lookat).norm();
-    let cam = Camera::new(lookfrom, lookat, Vec3::new(0.0, 1.0, 0.0), 20.0, nx as f64/ny as f64, 2.0, dist_to_focus);
+    let cam = Camera::new(lookfrom, lookat, Vec3::new(0.0, 1.0, 0.0), 45.0, nx as f64/ny as f64, 0.1, dist_to_focus);
     let mut rng = thread_rng();
 
     println!("P3\n{} {}\n255", nx, ny);
@@ -96,4 +70,61 @@ fn main() {
             println!("{} {} {}", col[0], col[1], col[2]);
         }
     }
+}
+
+fn random_scene() -> Vec<Box<Object>> {
+    let mut rng = thread_rng();
+
+    let mut world: Vec<Box<Object>> = Vec::with_capacity(500);
+    world.push(Box::new(Sphere {
+        center: Vec3::new(0.0, -1000.0, 0.0),
+        radius: 1000.0,
+        material: Material::Lambertian(Vec3::new(0.5, 0.5, 0.5)),
+    }));
+
+    for a in -11..11 {
+        for b in -11..11 {
+            let choose_mat = rng.gen::<f64>();
+            let center = Vec3::new(a as f64 + 0.9 + rng.gen::<f64>(), 0.2, b as f64 + rng.gen::<f64>());
+            if (center - Vec3::new(4.0, 0.2, 0.0)).norm() > 0.9 {
+                if choose_mat < 0.8 { // difuse
+                    world.push(Box::new(Sphere{
+                        center: center,
+                        radius: 0.2,
+                        material: Material::Lambertian(0.5*Vec3::from_fn(|_, _| rng.gen::<f64>()*rng.gen::<f64>())),
+                    }));
+                } else if choose_mat < 0.95 {
+                    world.push(Box::new(Sphere{
+                        center: center,
+                        radius: 0.2,
+                        material: Material::Metal(0.5*Vec3::from_fn(|_, _| 1.0 + rng.gen::<f64>()), rng.gen::<f64>()),
+                    }));
+                } else {
+                    world.push(Box::new(Sphere{
+                        center: center,
+                        radius: 0.2,
+                        material: Material::Dielectric(1.5),
+                    }));
+                }
+            }
+        }
+    }
+
+    world.push(Box::new(Sphere{
+        center: Vec3::new(0.0, 1.0, 0.0),
+        radius: 1.0,
+        material: Material::Dielectric(1.5),
+    }));
+    world.push(Box::new(Sphere{
+        center: Vec3::new(-4.0, 1.0, 0.0),
+        radius: 1.0,
+        material: Material::Lambertian(Vec3::new(0.4, 0.2, 0.1)),
+    }));
+    world.push(Box::new(Sphere{
+        center: Vec3::new(4.0, 1.0, 0.0),
+        radius: 1.0,
+        material: Material::Metal(Vec3::new(0.7, 0.6, 0.5), 0.0),
+    }));
+
+    world
 }
