@@ -1,12 +1,12 @@
-use rulinalg::vector::Vector;
 use std::f64;
+use crate::Vec3;
 use crate::ray::Ray;
 
 pub struct Camera {
-    lower_left_corner: Vector<f64>,
-    horizontal: Vector<f64>,
-    vertical: Vector<f64>,
-    origin: Vector<f64>,
+    lower_left_corner: Vec3,
+    horizontal: Vec3,
+    vertical: Vec3,
+    origin: Vec3,
 }
 
 impl Camera {
@@ -18,10 +18,10 @@ impl Camera {
         let half_height = f64::tan(theta/2.0);
         let half_width = aspect*half_height;
         Camera {
-            lower_left_corner: Vector::new(vec![-half_width, -half_height, -1.0]),
-            horizontal: Vector::new(vec![2.0*half_width, 0.0, 0.0]),
-            vertical: Vector::new(vec![0.0, 2.0*half_height, 0.0]),
-            origin: Vector::new(vec![0.0, 0.0, 0.0]),
+            lower_left_corner: Vec3::new(-half_width, -half_height, -1.0),
+            horizontal: Vec3::new(2.0*half_width, 0.0, 0.0),
+            vertical: Vec3::new(0.0, 2.0*half_height, 0.0),
+            origin: Vec3::new(0.0, 0.0, 0.0),
         }
     }
 

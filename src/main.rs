@@ -1,12 +1,10 @@
-extern crate rulinalg;
 extern crate rand;
 
 extern crate raytracer;
 
-use rulinalg::vector::Vector;
 use rand::prelude::*;
 
-use raytracer::unitize;
+use raytracer::Vec3;
 use raytracer::ray::{Ray, HitRec};
 use raytracer::camera::Camera;
 use raytracer::object::Object;
@@ -25,22 +23,22 @@ fn hit<'a>(obj_list: &'a Vec<Box<Object>>, ray: &Ray, t_min: f64, t_max: f64) ->
     hit_rec
 }
 
-fn color(r: &Ray, world: &Vec<Box<Object>>, depth: usize) -> Vector<f64> {
+fn color(r: &Ray, world: &Vec<Box<Object>>, depth: usize) -> Vec3 {
     match hit(world, r, 0.0001, std::f64::INFINITY) {
         Some(hit_rec) => {
             if depth < 50 {
                 if let Some((attenuation, scattered)) = hit_rec.material.scatter(r, &hit_rec) {
-                    color(&scattered, &world, depth+1).elemul(&attenuation)
+                    color(&scattered, &world, depth+1).component_mul(&attenuation)
                 } else {
-                    Vector::zeros(3)
+                    Vec3::zeros()
                 }
             } else {
-                Vector::zeros(3)
+                Vec3::zeros()
             }
         }
         None => {
-            let t = 0.5*unitize(&r.dire)[1] + 1.0;
-            Vector::ones(3)*(1.0-t) + Vector::new(vec![0.5, 0.7, 1.0])*t
+            let t = 0.5*r.dire.normalize()[1] + 1.0;
+            Vec3::from_element(1.0)*(1.0-t) + Vec3::new(0.5, 0.7, 1.0)*t
         }
     }
 }
@@ -52,46 +50,46 @@ fn main() {
 
     let world: Vec<Box<Object>> = vec![
         Box::new(Sphere {
-            center: Vector::new(vec![0.0, 0.0, -1.0]),
+            center: Vec3::new(0.0, 0.0, -1.0),
             radius: 0.5,
-            material: Material::Lambertian(Vector::new(vec![0.1, 0.2, 0.5])),
+            material: Material::Lambertian(Vec3::new(0.1, 0.2, 0.5)),
         }),
         Box::new(Sphere {
-            center: Vector::new(vec![0.0, -100.5, -1.0]),
+            center: Vec3::new(0.0, -100.5, -1.0),
             radius: 100.0,
-            material: Material::Lambertian(Vector::new(vec![0.8, 0.8, 0.0])),
+            material: Material::Lambertian(Vec3::new(0.8, 0.8, 0.0)),
         }),
         Box::new(Sphere {
-            center: Vector::new(vec![1.0, 0.0, -1.0]),
+            center: Vec3::new(1.0, 0.0, -1.0),
             radius: 0.5,
-            material: Material::Metal(Vector::new(vec![0.8, 0.6, 0.2]), 0.5),
+            material: Material::Metal(Vec3::new(0.8, 0.6, 0.2), 0.5),
         }),
         Box::new(Sphere {
-            center: Vector::new(vec![-1.0, 0.0, -1.0]),
+            center: Vec3::new(-1.0, 0.0, -1.0),
             radius: 0.5,
             material: Material::Dielectric(1.5),
         }),
         Box::new(Sphere {
-            center: Vector::new(vec![-1.0, 0.0, -1.0]),
+            center: Vec3::new(-1.0, 0.0, -1.0),
             radius: -0.45,
             material: Material::Dielectric(1.5),
         }),
     ];
 
-    let cam = Camera::new(180.0, nx as f64/ny as f64);
+    let cam = Camera::new(90.0, nx as f64/ny as f64);
     let mut rng = thread_rng();
 
     println!("P3\n{} {}\n255", nx, ny);
     for j in (0..ny).rev() {
         for i in 0..nx {
-            let mut col = Vector::new(vec![0.0, 0.0, 0.0]);
+            let mut col = Vec3::new(0.0, 0.0, 0.0);
             for _ in 0..ns {
                 let u = (i as f64 + rng.gen::<f64>()) / nx as f64;
                 let v = (j as f64 + rng.gen::<f64>()) / ny as f64;
                 let r = cam.get_ray(u, v);
                 col += color(&r, &world, 0);
             }
-            let col = Vector::new(col.data().into_iter().map(|x| ((x/ns as f64).sqrt()*255.99) as usize).collect::<Vec<_>>());
+            let col = col.map(|x| ((x/ns as f64).sqrt()*255.99) as usize);
             println!("{} {} {}", col[0], col[1], col[2]);
         }
     }

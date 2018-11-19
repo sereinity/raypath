@@ -5,5 +5,5 @@ authors = ["Sereinity <sereinity@sereinity.fr>"]
 edition = "2018"
 
 [dependencies]
-rulinalg = "0.4.2"
+nalgebra = "0.16.10"
 rand = "0.5"

@@ -1,26 +1,24 @@
-use rulinalg::vector::Vector;
-use rulinalg::norm::Euclidean;
 use rand::prelude::*;
 
-use crate::unitize;
+use crate::Vec3;
 use crate::ray::{Ray, HitRec};
 use crate::sphere::random_in_unit_sphere;
 
 pub enum Material {
-    Lambertian(Vector<f64>),
-    Metal(Vector<f64>, f64),
+    Lambertian(Vec3),
+    Metal(Vec3, f64),
     Dielectric(f64),
 }
 
 impl Material {
-    pub fn scatter<'a>(&self, ray: &Ray, hitr: &'a HitRec) -> Option<(Vector<f64>, Ray<'a>)> {
+    pub fn scatter<'a>(&self, ray: &Ray, hitr: &'a HitRec) -> Option<(Vec3, Ray<'a>)> {
         match self {
             Material::Lambertian(attenuation) => {
                 let target = &hitr.norm + random_in_unit_sphere();
                 Some((attenuation.clone(), Ray::new(&hitr.p, target)))
             },
             Material::Metal(attenuation, fuzz) => {
-                let reflected = reflect(unitize(&ray.dire), &hitr.norm);
+                let reflected = reflect(ray.dire.normalize(), &hitr.norm);
                 let scattered = Ray::new(&hitr.p, reflected + random_in_unit_sphere()*fuzz.min(1.0));
                 if scattered.dire.dot(&hitr.norm) > 0.0 {
                     Some((attenuation.clone(), scattered))
@@ -31,12 +29,12 @@ impl Material {
             Material::Dielectric(ref_idx) => {
                 let mut rng = thread_rng();
                 let reflected = reflect(ray.dire.clone(), &hitr.norm);
-                let attenuation = Vector::ones(3);
+                let attenuation = Vec3::from_element(1.0);
                 let (out_norm, ni_over_nt, cosine) = if ray.dire.dot(&hitr.norm) > 0.0 {
-                    let cosine = ref_idx*ray.dire.dot(&hitr.norm) / ray.dire.norm(Euclidean);
+                    let cosine = ref_idx*ray.dire.dot(&hitr.norm) / ray.dire.norm();
                     (-&hitr.norm, ref_idx.clone(), cosine)
                 } else {
-                    let cosine = -ray.dire.dot(&hitr.norm) / ray.dire.norm(Euclidean);
+                    let cosine = -ray.dire.dot(&hitr.norm) / ray.dire.norm();
                     (hitr.norm.clone(), 1.0/ref_idx, cosine)
                 };
                 if let Some(refracted) = refract(&ray.dire, out_norm, ni_over_nt) {
@@ -53,12 +51,12 @@ impl Material {
     }
 }
 
-fn reflect(vect: Vector<f64>, norm: &Vector<f64>) -> Vector<f64> {
+fn reflect(vect: Vec3, norm: &Vec3) -> Vec3 {
     &vect - norm*2.0*vect.dot(norm)
 }
 
-fn refract(vect: &Vector<f64>, norm: Vector<f64>, ni_over_nt: f64) -> Option<Vector<f64>> {
-    let unit = unitize(&vect);
+fn refract(vect: &Vec3, norm: Vec3, ni_over_nt: f64) -> Option<Vec3> {
+    let unit = vect.normalize();
     let dt = unit.dot(&norm);
     let discriminent = 1.0 - ni_over_nt*ni_over_nt*(1.0-dt*dt);
     if discriminent > 0.0 {
