@@ -1,7 +1,3 @@
-extern crate rand;
-
-extern crate raytracer;
-
 use rand::prelude::*;
 
 use raytracer::Vec3;

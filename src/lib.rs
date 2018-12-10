@@ -1,5 +1,3 @@
-extern crate nalgebra;
-
 pub mod camera;
 pub mod material;
 pub mod object;
