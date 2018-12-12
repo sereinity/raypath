@@ -7,7 +7,7 @@ use raytracer::object::Object;
 use raytracer::sphere::Sphere;
 use raytracer::material::Material;
 
-fn hit<'a>(obj_list: &'a Vec<Box<Object>>, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRec<'a>> {
+fn hit<'a>(obj_list: &'a Vec<Box<dyn Object>>, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRec<'a>> {
     let mut hit_rec: Option<HitRec> = None;
     let mut closest_so_far = t_max;
     for object in obj_list {
@@ -19,7 +19,7 @@ fn hit<'a>(obj_list: &'a Vec<Box<Object>>, ray: &Ray, t_min: f64, t_max: f64) ->
     hit_rec
 }
 
-fn color(r: &Ray, world: &Vec<Box<Object>>, depth: usize) -> Vec3 {
+fn color(r: &Ray, world: &Vec<Box<dyn Object>>, depth: usize) -> Vec3 {
     match hit(world, r, 0.0001, std::f64::INFINITY) {
         Some(hit_rec) => {
             if depth < 50 {
@@ -68,10 +68,10 @@ fn main() {
     }
 }
 
-fn random_scene() -> Vec<Box<Object>> {
+fn random_scene() -> Vec<Box<dyn Object>> {
     let mut rng = thread_rng();
 
-    let mut world: Vec<Box<Object>> = Vec::with_capacity(500);
+    let mut world: Vec<Box<dyn Object>> = Vec::with_capacity(500);
     world.push(Box::new(Sphere {
         center: Vec3::new(0.0, -1000.0, 0.0),
         radius: 1000.0,
