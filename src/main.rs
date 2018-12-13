@@ -1,4 +1,5 @@
 use image;
+use indicatif::ProgressBar;
 use rand::prelude::*;
 
 use raytracer::Vec3;
@@ -44,6 +45,7 @@ fn main() {
     let nx = 200;
     let ny = 100;
     let ns = 100;
+    let bar = ProgressBar::new((nx*ny) as u64);
 
     let world = random_scene();
 
@@ -65,8 +67,10 @@ fn main() {
             }
             pixs.extend(col.map(|x| ((x/ns as f64).sqrt()*(u8::max_value() as f64)) as u8).as_slice());
             pixs.push(u8::max_value());
+            bar.inc(1);
         }
     }
+    bar.finish_and_clear();
 
     image::save_buffer(
         "out.png",
