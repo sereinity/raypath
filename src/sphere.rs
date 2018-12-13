@@ -48,7 +48,7 @@ impl Object for Sphere {
     }
 }
 
-pub fn random_in_unit_sphere() -> Vec3 {
+pub(crate) fn random_in_unit_sphere() -> Vec3 {
     let mut rng = thread_rng();
     loop {
         // Random taken from a cube of 2x2x2 centered on 1x1x1

@@ -1,51 +1,17 @@
 use image;
-use indicatif::ProgressBar;
 use rand::prelude::*;
 
 use raytracer::Vec3;
-use raytracer::ray::{Ray, HitRec};
+use raytracer::ray::render;
 use raytracer::camera::Camera;
 use raytracer::object::Object;
 use raytracer::sphere::Sphere;
 use raytracer::material::Material;
 
-fn hit<'a>(obj_list: &'a Vec<Box<dyn Object>>, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRec<'a>> {
-    let mut hit_rec: Option<HitRec> = None;
-    let mut closest_so_far = t_max;
-    for object in obj_list {
-        if let Some(temp_hit_rec) = object.hit(ray, t_min, closest_so_far) {
-            closest_so_far = temp_hit_rec.t;
-            hit_rec = Some(temp_hit_rec);
-        }
-    }
-    hit_rec
-}
-
-fn color(r: &Ray, world: &Vec<Box<dyn Object>>, depth: usize) -> Vec3 {
-    match hit(world, r, 0.0001, std::f64::INFINITY) {
-        Some(hit_rec) => {
-            if depth < 50 {
-                if let Some((attenuation, scattered)) = hit_rec.material.scatter(r, &hit_rec) {
-                    color(&scattered, &world, depth+1).component_mul(&attenuation)
-                } else {
-                    Vec3::zeros()
-                }
-            } else {
-                Vec3::zeros()
-            }
-        }
-        None => {
-            let t = 0.5*r.dire.normalize()[1] + 1.0;
-            Vec3::from_element(1.0)*(1.0-t) + Vec3::new(0.5, 0.7, 1.0)*t
-        }
-    }
-}
-
 fn main() {
     let nx = 200;
     let ny = 100;
     let ns = 100;
-    let bar = ProgressBar::new((nx*ny) as u64);
 
     let world = random_scene();
 
@@ -53,24 +19,7 @@ fn main() {
     let lookat = Vec3::new(0.0, 0.0, 0.0);
     let dist_to_focus = (lookfrom-lookat).norm();
     let cam = Camera::new(lookfrom, lookat, Vec3::new(0.0, 1.0, 0.0), 45.0, nx as f64/ny as f64, 0.1, dist_to_focus);
-    let mut rng = thread_rng();
-    let mut pixs = Vec::with_capacity(nx*ny*4);
-
-    for j in (0..ny).rev() {
-        for i in 0..nx {
-            let mut col = Vec3::new(0.0, 0.0, 0.0);
-            for _ in 0..ns {
-                let u = (i as f64 + rng.gen::<f64>()) / nx as f64;
-                let v = (j as f64 + rng.gen::<f64>()) / ny as f64;
-                let r = cam.get_ray(u, v);
-                col += color(&r, &world, 0);
-            }
-            pixs.extend(col.map(|x| ((x/ns as f64).sqrt()*(u8::max_value() as f64)) as u8).as_slice());
-            pixs.push(u8::max_value());
-            bar.inc(1);
-        }
-    }
-    bar.finish_and_clear();
+    let pixs = render(world, cam, nx, ny, ns);
 
     image::save_buffer(
         "out.png",

@@ -41,7 +41,7 @@ impl Camera {
         }
     }
 
-    pub fn get_ray(&self, u: f64, v: f64) -> Ray {
+    pub(crate) fn get_ray(&self, u: f64, v: f64) -> Ray {
         let rd = self.lens_radiaus*random_in_unit_disk();
         let offset = self.u*rd.x + self.v*rd.y;
         let origin = self.origin + offset;
