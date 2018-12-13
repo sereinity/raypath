@@ -1,3 +1,4 @@
+use clap::{load_yaml, App, crate_version};
 use image;
 use rand::prelude::*;
 
@@ -9,9 +10,15 @@ use raytracer::sphere::Sphere;
 use raytracer::material::Material;
 
 fn main() {
-    let nx = 200;
-    let ny = 100;
-    let ns = 100;
+    let yaml = load_yaml!("cli.yml");
+    let matches = App::from_yaml(yaml).version(crate_version!()).get_matches();
+    let (nx, ny, ns) = match matches.value_of("quality").unwrap() {
+        "medium" => (400, 200, 200),
+        "high" => (1000, 500, 1000),
+        "HD" => (1920, 1080, 1000),
+        "4K" => (4096, 2160, 1000),
+        "low"|_ => (200, 100, 100),
+    };
 
     let world = random_scene();
 
@@ -22,7 +29,7 @@ fn main() {
     let pixs = render(world, cam, nx, ny, ns);
 
     image::save_buffer(
-        "out.png",
+        matches.value_of("output").unwrap(),
         &pixs,
         nx as u32,
         ny as u32,
