@@ -1,3 +1,4 @@
+use image;
 use rand::prelude::*;
 
 use raytracer::Vec3;
@@ -51,8 +52,8 @@ fn main() {
     let dist_to_focus = (lookfrom-lookat).norm();
     let cam = Camera::new(lookfrom, lookat, Vec3::new(0.0, 1.0, 0.0), 45.0, nx as f64/ny as f64, 0.1, dist_to_focus);
     let mut rng = thread_rng();
+    let mut pixs = Vec::with_capacity(nx*ny*4);
 
-    println!("P3\n{} {}\n255", nx, ny);
     for j in (0..ny).rev() {
         for i in 0..nx {
             let mut col = Vec3::new(0.0, 0.0, 0.0);
@@ -62,10 +63,18 @@ fn main() {
                 let r = cam.get_ray(u, v);
                 col += color(&r, &world, 0);
             }
-            let col = col.map(|x| ((x/ns as f64).sqrt()*255.99) as usize);
-            println!("{} {} {}", col[0], col[1], col[2]);
+            pixs.extend(col.map(|x| ((x/ns as f64).sqrt()*(u8::max_value() as f64)) as u8).as_slice());
+            pixs.push(u8::max_value());
         }
     }
+
+    image::save_buffer(
+        "out.png",
+        &pixs,
+        nx as u32,
+        ny as u32,
+        image::RGBA(8),
+    ).expect("Can't save the image");
 }
 
 fn random_scene() -> Vec<Box<dyn Object>> {
