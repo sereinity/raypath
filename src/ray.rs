@@ -66,6 +66,7 @@ fn color(r: &Ray, world: &Vec<Box<dyn Object>>, depth: usize) -> Vec3 {
 pub fn render(scene: Vec<Box<dyn Object>>, camera: Camera, nx: usize, ny: usize, ns: usize) -> Vec<u8> {
     let bar = ProgressBar::new((nx*ny) as u64);
     bar.set_message("Rendering");
+    bar.set_draw_delta(50);
     bar.set_style(ProgressStyle::default_bar()
                   .template("{msg} {wide_bar} eta: {eta} {pos:>7}/{len:7}")
         );
