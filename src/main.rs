@@ -33,7 +33,7 @@ fn main() {
         &pixs,
         nx as u32,
         ny as u32,
-        image::RGBA(8),
+        image::ColorType::Rgba8,
     ).expect("Can't save the image");
 }
 
