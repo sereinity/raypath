@@ -1,5 +1,5 @@
 ---
-name: raytracer
+name: raytracing
 about: Render random scene using some raytracing
 args:
   - output:

@@ -2,12 +2,12 @@ use clap::{load_yaml, App, crate_version};
 use image;
 use rand::prelude::*;
 
-use raytracer::Vec3;
-use raytracer::ray::render;
-use raytracer::camera::Camera;
-use raytracer::object::Object;
-use raytracer::sphere::Sphere;
-use raytracer::material::Material;
+use raytracing::Vec3;
+use raytracing::ray::render;
+use raytracing::camera::Camera;
+use raytracing::object::Object;
+use raytracing::sphere::Sphere;
+use raytracing::material::Material;
 
 fn main() {
     let yaml = load_yaml!("cli.yml");
