@@ -20,7 +20,7 @@ impl Ray {
     }
 
     pub fn point_at_parameter(&self, param: f64) -> Vec3 {
-        self.orig + &self.dire * param
+        self.orig + self.dire * param
     }
 }
 

@@ -14,7 +14,7 @@ impl Material {
     pub(crate) fn scatter(&self, ray: &Ray, hitr: &HitRec) -> Option<(Vec3, Ray)> {
         match self {
             Material::Lambertian(attenuation) => {
-                let target = &hitr.norm + random_in_unit_sphere();
+                let target = hitr.norm + random_in_unit_sphere();
                 Some((*attenuation, Ray::new(hitr.p, target)))
             }
             Material::Metal(attenuation, fuzz) => {
@@ -53,7 +53,7 @@ impl Material {
 }
 
 fn reflect(vect: Vec3, norm: &Vec3) -> Vec3 {
-    &vect - norm * 2.0 * vect.dot(norm)
+    vect - norm * 2.0 * vect.dot(norm)
 }
 
 fn refract(vect: &Vec3, norm: Vec3, ni_over_nt: f64) -> Option<Vec3> {
@@ -61,7 +61,7 @@ fn refract(vect: &Vec3, norm: Vec3, ni_over_nt: f64) -> Option<Vec3> {
     let dt = unit.dot(&norm);
     let discriminent = 1.0 - ni_over_nt * ni_over_nt * (1.0 - dt * dt);
     if discriminent > 0.0 {
-        Some((unit - &norm * dt) * ni_over_nt - &norm * discriminent.sqrt())
+        Some((unit - norm * dt) * ni_over_nt - norm * discriminent.sqrt())
     } else {
         None
     }

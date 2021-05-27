@@ -13,16 +13,16 @@ pub struct Sphere {
 
 impl Object for Sphere {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRec> {
-        let oc = ray.orig - &self.center;
+        let oc = ray.orig - self.center;
         let a = ray.dire.dot(&ray.dire);
         let b = oc.dot(&ray.dire);
-        let c = oc.dot(&oc) - &self.radius * &self.radius;
+        let c = oc.dot(&oc) - self.radius * self.radius;
         let discriminent = b * b - a * c;
         if discriminent >= 0.0 {
             let temp = (-b - discriminent.sqrt()) / a;
             if (temp <= t_max) & (temp >= t_min) {
                 let point = ray.point_at_parameter(temp);
-                let norm = (&point - &self.center) / self.radius;
+                let norm = (point - self.center) / self.radius;
                 return Some(HitRec {
                     t: temp,
                     p: point,
@@ -33,7 +33,7 @@ impl Object for Sphere {
             let temp = (-b + discriminent.sqrt()) / a;
             if (temp <= t_max) & (temp >= t_min) {
                 let point = ray.point_at_parameter(temp);
-                let norm = (&point - &self.center) / self.radius;
+                let norm = (point - self.center) / self.radius;
                 return Some(HitRec {
                     t: temp,
                     p: point,
