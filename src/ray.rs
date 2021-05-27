@@ -32,7 +32,7 @@ pub struct HitRec<'a> {
 }
 
 pub(crate) fn hit<'a>(
-    obj_list: &'a Vec<Box<dyn Object>>,
+    obj_list: &'a [Box<dyn Object>],
     ray: &Ray,
     t_min: f64,
     t_max: f64,
@@ -48,7 +48,7 @@ pub(crate) fn hit<'a>(
     hit_rec
 }
 
-fn color(r: &Ray, world: &Vec<Box<dyn Object>>, depth: usize) -> Vec3 {
+fn color(r: &Ray, world: &[Box<dyn Object>], depth: usize) -> Vec3 {
     match hit(world, r, 0.0001, std::f64::INFINITY) {
         Some(hit_rec) => {
             if depth < 50 {
