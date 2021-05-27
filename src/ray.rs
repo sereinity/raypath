@@ -1,10 +1,10 @@
 use indicatif::{ProgressBar, ProgressStyle};
 use rand::prelude::*;
 
-use crate::Vec3;
 use crate::camera::Camera;
 use crate::material::Material;
 use crate::object::Object;
+use crate::Vec3;
 
 pub struct Ray {
     pub orig: Vec3,
@@ -20,7 +20,7 @@ impl Ray {
     }
 
     pub fn point_at_parameter(&self, param: f64) -> Vec3 {
-        self.orig + &self.dire*param
+        self.orig + &self.dire * param
     }
 }
 
@@ -31,7 +31,12 @@ pub struct HitRec<'a> {
     pub material: &'a Material,
 }
 
-pub(crate) fn hit<'a>(obj_list: &'a Vec<Box<dyn Object>>, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRec<'a>> {
+pub(crate) fn hit<'a>(
+    obj_list: &'a Vec<Box<dyn Object>>,
+    ray: &Ray,
+    t_min: f64,
+    t_max: f64,
+) -> Option<HitRec<'a>> {
     let mut hit_rec: Option<HitRec> = None;
     let mut closest_so_far = t_max;
     for object in obj_list {
@@ -48,7 +53,7 @@ fn color(r: &Ray, world: &Vec<Box<dyn Object>>, depth: usize) -> Vec3 {
         Some(hit_rec) => {
             if depth < 50 {
                 if let Some((attenuation, scattered)) = hit_rec.material.scatter(r, &hit_rec) {
-                    color(&scattered, &world, depth+1).component_mul(&attenuation)
+                    color(&scattered, &world, depth + 1).component_mul(&attenuation)
                 } else {
                     Vec3::zeros()
                 }
@@ -57,21 +62,27 @@ fn color(r: &Ray, world: &Vec<Box<dyn Object>>, depth: usize) -> Vec3 {
             }
         }
         None => {
-            let t = 0.5*r.dire.normalize()[1] + 1.0;
-            Vec3::from_element(1.0)*(1.0-t) + Vec3::new(0.5, 0.7, 1.0)*t
+            let t = 0.5 * r.dire.normalize()[1] + 1.0;
+            Vec3::from_element(1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t
         }
     }
 }
 
-pub fn render(scene: Vec<Box<dyn Object>>, camera: Camera, nx: usize, ny: usize, ns: usize) -> Vec<u8> {
-    let bar = ProgressBar::new((nx*ny) as u64);
+pub fn render(
+    scene: Vec<Box<dyn Object>>,
+    camera: Camera,
+    nx: usize,
+    ny: usize,
+    ns: usize,
+) -> Vec<u8> {
+    let bar = ProgressBar::new((nx * ny) as u64);
     bar.set_message("Rendering");
     bar.set_draw_delta(50);
-    bar.set_style(ProgressStyle::default_bar()
-                  .template("{msg} {wide_bar} eta: {eta} {pos:>7}/{len:7}")
-        );
+    bar.set_style(
+        ProgressStyle::default_bar().template("{msg} {wide_bar} eta: {eta} {pos:>7}/{len:7}"),
+    );
     let mut rng = thread_rng();
-    let mut pixs = Vec::with_capacity(nx*ny*4);
+    let mut pixs = Vec::with_capacity(nx * ny * 4);
 
     for j in (0..ny).rev() {
         for i in 0..nx {
@@ -82,7 +93,10 @@ pub fn render(scene: Vec<Box<dyn Object>>, camera: Camera, nx: usize, ny: usize,
                 let r = camera.get_ray(u, v);
                 col += color(&r, &scene, 0);
             }
-            pixs.extend(col.map(|x| ((x/ns as f64).sqrt()*(u8::max_value() as f64)) as u8).as_slice());
+            pixs.extend(
+                col.map(|x| ((x / ns as f64).sqrt() * (u8::max_value() as f64)) as u8)
+                    .as_slice(),
+            );
             pixs.push(u8::max_value());
             bar.inc(1);
         }
