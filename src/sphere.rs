@@ -17,6 +17,7 @@ impl Object for Sphere {
         let a = ray.dire.dot(&ray.dire);
         let b = oc.dot(&ray.dire);
         let c = oc.dot(&oc) - self.radius * self.radius;
+        // https://github.com/rust-lang/rust-clippy/issues/6722
         let discriminent = b * b - a * c;
         if discriminent >= 0.0 {
             let temp = (-b - discriminent.sqrt()) / a;
