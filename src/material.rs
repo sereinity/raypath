@@ -15,28 +15,28 @@ impl Material {
         match self {
             Material::Lambertian(attenuation) => {
                 let target = &hitr.norm + random_in_unit_sphere();
-                Some((attenuation.clone(), Ray::new(hitr.p, target)))
+                Some((*attenuation, Ray::new(hitr.p, target)))
             }
             Material::Metal(attenuation, fuzz) => {
                 let reflected = reflect(ray.dire.normalize(), &hitr.norm);
                 let scattered =
                     Ray::new(hitr.p, reflected + random_in_unit_sphere() * fuzz.min(1.0));
                 if scattered.dire.dot(&hitr.norm) > 0.0 {
-                    Some((attenuation.clone(), scattered))
+                    Some((*attenuation, scattered))
                 } else {
                     None
                 }
             }
             Material::Dielectric(ref_idx) => {
                 let mut rng = thread_rng();
-                let reflected = reflect(ray.dire.clone(), &hitr.norm);
+                let reflected = reflect(ray.dire, &hitr.norm);
                 let attenuation = Vec3::from_element(1.0);
                 let (out_norm, ni_over_nt, cosine) = if ray.dire.dot(&hitr.norm) > 0.0 {
                     let cosine = ref_idx * ray.dire.dot(&hitr.norm) / ray.dire.norm();
-                    (-&hitr.norm, ref_idx.clone(), cosine)
+                    (-&hitr.norm, *ref_idx, cosine)
                 } else {
                     let cosine = -ray.dire.dot(&hitr.norm) / ray.dire.norm();
-                    (hitr.norm.clone(), 1.0 / ref_idx, cosine)
+                    (hitr.norm, 1.0 / ref_idx, cosine)
                 };
                 if let Some(refracted) = refract(&ray.dire, out_norm, ni_over_nt) {
                     if rng.gen::<f64>() < schlick(cosine, &ref_idx) {

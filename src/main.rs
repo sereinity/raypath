@@ -1,5 +1,5 @@
 use clap::{crate_version, load_yaml, App};
-use image;
+
 use rand::prelude::*;
 
 use raytracing::camera::Camera;
@@ -68,7 +68,7 @@ fn random_scene() -> Vec<Box<dyn Object>> {
                 if choose_mat < 0.8 {
                     // difuse
                     world.push(Box::new(Sphere {
-                        center: center,
+                        center,
                         radius: 0.2,
                         material: Material::Lambertian(
                             0.5 * Vec3::from_fn(|_, _| rng.gen::<f64>() * rng.gen::<f64>()),
@@ -76,7 +76,7 @@ fn random_scene() -> Vec<Box<dyn Object>> {
                     }));
                 } else if choose_mat < 0.95 {
                     world.push(Box::new(Sphere {
-                        center: center,
+                        center,
                         radius: 0.2,
                         material: Material::Metal(
                             0.5 * Vec3::from_fn(|_, _| 1.0 + rng.gen::<f64>()),
@@ -85,7 +85,7 @@ fn random_scene() -> Vec<Box<dyn Object>> {
                     }));
                 } else {
                     world.push(Box::new(Sphere {
-                        center: center,
+                        center,
                         radius: 0.2,
                         material: Material::Dielectric(1.5),
                     }));

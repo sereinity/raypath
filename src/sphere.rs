@@ -18,7 +18,7 @@ impl Object for Sphere {
         let b = oc.dot(&ray.dire);
         let c = oc.dot(&oc) - &self.radius * &self.radius;
         let discriminent = b * b - a * c;
-        return if discriminent >= 0.0 {
+        if discriminent >= 0.0 {
             let temp = (-b - discriminent.sqrt()) / a;
             if (temp <= t_max) & (temp >= t_min) {
                 let point = ray.point_at_parameter(temp);
@@ -26,7 +26,7 @@ impl Object for Sphere {
                 return Some(HitRec {
                     t: temp,
                     p: point,
-                    norm: norm,
+                    norm,
                     material: &self.material,
                 });
             }
@@ -37,14 +37,14 @@ impl Object for Sphere {
                 return Some(HitRec {
                     t: temp,
                     p: point,
-                    norm: norm,
+                    norm,
                     material: &self.material,
                 });
             }
             None
         } else {
             None
-        };
+        }
     }
 }
 
