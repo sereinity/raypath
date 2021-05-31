@@ -84,9 +84,8 @@ pub fn render(
     let mut rng = thread_rng();
     let pixs = (0..ny)
         .rev()
-        .map(|j| (0..nx).map(move |i| (i, j)))
-        .flatten()
-        .map(|(i, j)| {
+        .flat_map(|j| (0..nx).map(move |i| (i, j)))
+        .flat_map(|(i, j)| {
             let mut pix = Vec::with_capacity(4);
             let mut col = Vec3::new(0.0, 0.0, 0.0);
             for _ in 0..ns {
@@ -103,7 +102,6 @@ pub fn render(
             bar.inc(1);
             pix
         })
-        .flatten()
         .collect();
 
     bar.finish_and_clear();
