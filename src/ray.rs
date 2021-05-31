@@ -1,5 +1,6 @@
 use indicatif::{ProgressBar, ProgressStyle};
 use rand::prelude::*;
+use rayon::prelude::*;
 
 use crate::camera::Camera;
 use crate::material::Material;
@@ -81,16 +82,16 @@ pub fn render(
     bar.set_style(
         ProgressStyle::default_bar().template("{msg} {wide_bar} eta: {eta} {pos:>7}/{len:7}"),
     );
-    let mut rng = thread_rng();
     let pixs = (0..ny)
+        .into_par_iter()
         .rev()
-        .flat_map(|j| (0..nx).map(move |i| (i, j)))
+        .flat_map(|j| (0..nx).into_par_iter().map(move |i| (i, j)))
         .flat_map(|(i, j)| {
             let mut pix = Vec::with_capacity(4);
             let mut col = Vec3::new(0.0, 0.0, 0.0);
             for _ in 0..ns {
-                let u = (i as f64 + rng.gen::<f64>()) / nx as f64;
-                let v = (j as f64 + rng.gen::<f64>()) / ny as f64;
+                let u = (i as f64 + thread_rng().gen::<f64>()) / nx as f64;
+                let v = (j as f64 + thread_rng().gen::<f64>()) / ny as f64;
                 let r = camera.get_ray(u, v);
                 col += color(&r, &scene, 0);
             }
