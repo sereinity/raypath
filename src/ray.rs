@@ -82,10 +82,12 @@ pub fn render(
         ProgressStyle::default_bar().template("{msg} {wide_bar} eta: {eta} {pos:>7}/{len:7}"),
     );
     let mut rng = thread_rng();
-    let mut pixs = Vec::with_capacity(nx * ny * 4);
-
-    for j in (0..ny).rev() {
-        for i in 0..nx {
+    let pixs = (0..ny)
+        .rev()
+        .map(|j| (0..nx).map(move |i| (i, j)))
+        .flatten()
+        .map(|(i, j)| {
+            let mut pix = Vec::with_capacity(4);
             let mut col = Vec3::new(0.0, 0.0, 0.0);
             for _ in 0..ns {
                 let u = (i as f64 + rng.gen::<f64>()) / nx as f64;
@@ -93,14 +95,17 @@ pub fn render(
                 let r = camera.get_ray(u, v);
                 col += color(&r, &scene, 0);
             }
-            pixs.extend(
+            pix.extend(
                 col.map(|x| ((x / ns as f64).sqrt() * (u8::max_value() as f64)) as u8)
                     .as_slice(),
             );
-            pixs.push(u8::max_value());
+            pix.push(u8::max_value());
             bar.inc(1);
-        }
-    }
+            pix
+        })
+        .flatten()
+        .collect();
+
     bar.finish_and_clear();
 
     pixs
