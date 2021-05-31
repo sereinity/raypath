@@ -35,7 +35,7 @@ fn main() {
         0.1,
         dist_to_focus,
     );
-    let pixs = render(world, cam, nx, ny, ns);
+    let pixs = render(&world, cam, nx, ny, ns);
 
     image::save_buffer(
         matches.value_of("output").unwrap(),

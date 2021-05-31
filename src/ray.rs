@@ -69,7 +69,7 @@ fn color(r: &Ray, world: &[Box<dyn Object>], depth: usize) -> Vec3 {
 }
 
 pub fn render(
-    scene: Vec<Box<dyn Object>>,
+    scene: &[Box<dyn Object>],
     camera: Camera,
     nx: usize,
     ny: usize,
