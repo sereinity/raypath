@@ -39,7 +39,7 @@ impl Material {
                     (hitr.norm, 1.0 / ref_idx, cosine)
                 };
                 if let Some(refracted) = refract(&ray.dire, out_norm, ni_over_nt) {
-                    if rng.gen::<f64>() < schlick(cosine, &ref_idx) {
+                    if rng.gen::<f64>() < schlick(cosine, ref_idx) {
                         Some((attenuation, Ray::new(hitr.p, reflected)))
                     } else {
                         Some((attenuation, Ray::new(hitr.p, refracted)))

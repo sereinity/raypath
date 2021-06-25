@@ -54,7 +54,7 @@ fn color(r: &Ray, world: &[Box<dyn Object>], depth: usize) -> Vec3 {
         Some(hit_rec) => {
             if depth < 50 {
                 if let Some((attenuation, scattered)) = hit_rec.material.scatter(r, &hit_rec) {
-                    color(&scattered, &world, depth + 1).component_mul(&attenuation)
+                    color(&scattered, world, depth + 1).component_mul(&attenuation)
                 } else {
                     Vec3::zeros()
                 }
@@ -93,7 +93,7 @@ pub fn render(
                 let u = (i as f64 + thread_rng().gen::<f64>()) / nx as f64;
                 let v = (j as f64 + thread_rng().gen::<f64>()) / ny as f64;
                 let r = camera.get_ray(u, v);
-                col += color(&r, &scene, 0);
+                col += color(&r, scene, 0);
             }
             pix.extend(
                 col.map(|x| ((x / ns as f64).sqrt() * (u8::max_value() as f64)) as u8)
