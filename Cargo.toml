@@ -5,7 +5,7 @@ authors = ["Sereinity <sereinity@sereinity.fr>"]
 edition = "2018"
 
 [dependencies]
-clap = {version = "2.33", features = ["yaml"]}
+clap = {version = "3.2", features = ["yaml", "cargo"]}
 image = "0.24"
 indicatif = "0.16"
 nalgebra = "0.31"
