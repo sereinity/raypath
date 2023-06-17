@@ -1,6 +1,7 @@
-use clap::{crate_version, load_yaml, App};
+use clap::{Parser, ValueEnum};
 
 use rand::prelude::*;
+use std::path::PathBuf;
 
 use raytracing::camera::Camera;
 use raytracing::material::Material;
@@ -9,16 +10,41 @@ use raytracing::ray::render;
 use raytracing::sphere::Sphere;
 use raytracing::Vec3;
 
+#[derive(Parser)]
+#[command(version)]
+#[command(about = "Render random scene using some raytracing")]
+struct Cli {
+    #[arg(short, long)]
+    #[arg(help = "The ouputed image file (png or jpg)")]
+    #[arg(value_parser = clap::value_parser!(PathBuf))]
+    #[arg(default_value = "out.png")]
+    output: PathBuf,
+
+    #[arg(short, long)]
+    #[arg(help = "The output quality (the higher the slower)")]
+    #[arg(value_enum, default_value_t = Qualities::Low)]
+    quality: Qualities,
+}
+
+#[derive(Clone, ValueEnum)]
+enum Qualities {
+    Low,
+    Medium,
+    High,
+    HD,
+    #[value(name = "4K")]
+    FourK,
+}
+
 fn main() {
-    let yaml = load_yaml!("cli.yml");
-    let matches = App::from_yaml(yaml).version(crate_version!()).get_matches();
-    let (nx, ny, ns) = match matches.value_of("quality").unwrap() {
-        "medium" => (400, 200, 200),
-        "high" => (1000, 500, 1000),
-        "HD" => (1920, 1080, 1000),
-        "4K" => (4096, 2160, 1000),
-        "low" => (200, 100, 100), // also the default
-        _ => (200, 100, 100),
+    let cli = Cli::parse();
+
+    let (nx, ny, ns) = match cli.quality {
+        Qualities::Low => (200, 100, 100),
+        Qualities::Medium => (400, 200, 200),
+        Qualities::High => (1000, 500, 1000),
+        Qualities::HD => (1920, 1080, 1000),
+        Qualities::FourK => (4096, 2160, 1000),
     };
 
     let world = random_scene();
@@ -38,7 +64,7 @@ fn main() {
     let pixs = render(&world, cam, nx, ny, ns);
 
     image::save_buffer(
-        matches.value_of("output").unwrap(),
+        cli.output,
         &pixs,
         nx as u32,
         ny as u32,
