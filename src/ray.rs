@@ -38,7 +38,7 @@ pub(crate) fn hit<'a>(
     t_min: f64,
     t_max: f64,
 ) -> Option<HitRec<'a>> {
-    let mut hit_rec: Option<HitRec> = None;
+    let mut hit_rec: Option<HitRec<'_>> = None;
     let mut closest_so_far = t_max;
     for object in obj_list {
         if let Some(temp_hit_rec) = object.hit(ray, t_min, closest_so_far) {

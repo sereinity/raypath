@@ -12,7 +12,7 @@ pub struct Sphere {
 }
 
 impl Object for Sphere {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRec> {
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRec<'_>> {
         let oc = ray.orig - self.center;
         let a = ray.dire.dot(&ray.dire);
         let b = oc.dot(&ray.dire);

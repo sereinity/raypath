@@ -11,7 +11,7 @@ pub enum Material {
 }
 
 impl Material {
-    pub(crate) fn scatter(&self, ray: &Ray, hitr: &HitRec) -> Option<(Vec3, Ray)> {
+    pub(crate) fn scatter(&self, ray: &Ray, hitr: &HitRec<'_>) -> Option<(Vec3, Ray)> {
         match self {
             Material::Lambertian(attenuation) => {
                 let target = hitr.norm + random_in_unit_sphere();
