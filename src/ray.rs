@@ -1,4 +1,4 @@
-use indicatif::{ProgressBar, ProgressStyle};
+use indicatif::{ProgressBar, ProgressDrawTarget, ProgressStyle};
 use rand::prelude::*;
 use rayon::prelude::*;
 
@@ -76,11 +76,15 @@ pub fn render(
     ny: usize,
     ns: usize,
 ) -> Vec<u8> {
-    let bar = ProgressBar::new((nx * ny) as u64);
+    let bar = ProgressBar::with_draw_target(
+        Some((nx * ny) as u64),
+        ProgressDrawTarget::stdout_with_hz(5),
+    );
     bar.set_message("Rendering");
-    bar.set_draw_delta(50);
     bar.set_style(
-        ProgressStyle::default_bar().template("{msg} {wide_bar} eta: {eta} {pos:>7}/{len:7}"),
+        ProgressStyle::default_bar()
+            .template("{msg} {wide_bar} eta: {eta} {pos:>7}/{len:7}")
+            .unwrap(),
     );
     let pixs = (0..ny)
         .into_par_iter()
