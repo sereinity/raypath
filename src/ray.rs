@@ -50,7 +50,7 @@ pub(crate) fn hit<'a>(
 }
 
 fn color(r: &Ray, world: &[Box<dyn Object>], depth: usize) -> Vec3 {
-    match hit(world, r, 0.0001, std::f64::INFINITY) {
+    match hit(world, r, 0.0001, f64::INFINITY) {
         Some(hit_rec) => {
             if depth < 50 {
                 if let Some((attenuation, scattered)) = hit_rec.material.scatter(r, &hit_rec) {
@@ -100,10 +100,10 @@ pub fn render(
                 col += color(&r, scene, 0);
             }
             pix.extend(
-                col.map(|x| ((x / ns as f64).sqrt() * (u8::max_value() as f64)) as u8)
+                col.map(|x| ((x / ns as f64).sqrt() * (u8::MAX as f64)) as u8)
                     .as_slice(),
             );
-            pix.push(u8::max_value());
+            pix.push(u8::MAX);
             bar.inc(1);
             pix
         })
